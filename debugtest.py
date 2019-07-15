@@ -11,11 +11,8 @@ def increment_dictionary_values(d, i):
 class TestIncrementDictionaryValues(TestCase):
     def test_increment_dictionary_values(self):
         d = {'a': 1}
-        #print(d)
         dd = increment_dictionary_values(d,1)
-        #print(d)
         ddd = increment_dictionary_values(d, -1)
-        #print(d)
         self.assertEqual(dd['a'], 2)
         self.assertEqual(ddd['a'], 0)
 
