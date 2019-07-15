@@ -1,4 +1,3 @@
-
 '''
 This class is designed to go along with a class to collect input and construct the calls to the functions q_id etc,
  a class to connect to the database and execute the query and a class to display the gathered data
