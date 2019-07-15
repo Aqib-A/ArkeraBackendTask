@@ -1,16 +1,8 @@
-'''
-We have a sql table with 4 columns (id, url, date, rating). We need a set of classes that allows
-us to build a query which can filter this table across any combination of these possibilities:
-● id: >, <, =, IN, NOTIN
-● url: =
-● date: >, <, =
-● rating: >, <, =
-E.g. we may want all entries with: (2 < rating < 9) and (id in list) and (date > 1 Jan 2016).
-The goal is to have a set of classes which enable easy testing wherever they are used (i.e. the
-database does not have to be overly mocked every time). We want users of these classes to be
-able to add filters without having to add to or rewrite tests.
-'''
 
+'''
+This class is designed to go along with a class to collect input and construct the calls to the functions q_id etc,
+ a class to connect to the database and execute the query and a class to display the gathered data
+'''
 
 class QueryBuilder:
 
@@ -20,11 +12,11 @@ class QueryBuilder:
         self.query = ''
 
     def q_id(self, *args, condition='=', prefix='AND'):
-
-        if len(args) == 1 and not type(args[0]) is list:
+        comparisons = {'=', '<', '>'}
+        if len(args) == 1 and not type(args[0]) is list and condition in comparisons:
             self.conditions.append(['id' + condition + str(args[0]), prefix.upper()])
 
-        elif len(args) == 2 and not (type(args[0]) is list or type(args[1]) is list):
+        elif len(args) == 2 and (type(args[0]) is int and type(args[1]) is int):
             self.conditions.append(["(id BETWEEN " + str(args[0]) + " AND " + str(args[1]) + ')', prefix.upper()])
 
         elif len(args) == 1 and condition.lower() == 'in' and type(args[0]) is list:
@@ -57,10 +49,10 @@ class QueryBuilder:
         else:
             print('invalid arguments')
 
-    def buildSelectQuery(self):
+    def build_select_query(self):
         if len(self.conditions) == 0:
             print('First add conditions.')
-            return ''
+            return
         elif self.query != '':
             print('Please flush query before building another.')
             return
@@ -81,8 +73,10 @@ if __name__ == '__main__':
 
     builder = QueryBuilder('tablename')
 
-    builder.q_id(10, 11, condition='<')
+    builder.q_id(10, condition='>', prefix='Or')
     builder.q_url('www.url.com')
-    builder.q_id([1,2,3,4], 2, 2, condition='IN', prefix='or')
-    builder.buildSelectQuery()
-    print(builder.buildSelectQuery())
+    builder.q_id([1,2,3,4], condition='IN', prefix='or')
+    print(builder.build_select_query())
+    builder.flush()
+    builder.q_date(10, 5, prefix='AND')
+    print(builder.build_select_query())
